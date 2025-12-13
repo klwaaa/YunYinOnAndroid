@@ -427,7 +427,6 @@ fn update_theme_color(app: AppHandle, color_source: String) -> Result<(), String
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
   tauri::Builder::default()
-    .plugin(tauri_plugin_localhost::Builder::new(1420).build())
     .invoke_handler(tauri::generate_handler![
             get_token_by_code,
             get_token_by_refresh,
