@@ -6,9 +6,10 @@
       </div>
       <div class="nav-items">
         <div class="login">
-          <a v-if="!isLoggedIn" ref="loginRef" :href="loginUrl">请先登录</a>
+          <a v-if="!isLoggedIn" ref="loginRef" @click="test">请先登录</a>
           <span v-else @click="logOut">退出登录</span>
         </div>
+        <div class="test" v-show="isShow"></div>
         <div class="playListButton">
           <router-link :to="{
             path: '/PlayList',
@@ -70,6 +71,16 @@
   import {ref, watch} from "vue";
   import {invoke} from "@tauri-apps/api/core";
   
+  const isShow = ref(false);
+  
+  // function test() {
+  //   isShow.value = true;
+  //   console.log("access_token:",tokenStore.access_token);
+  //   console.log("refresh_token:",tokenStore.refresh_token);
+  //   console.log("code:",localStorage.getItem("code"));
+  // }
+  
+  
   const count = ref(0);
   const route = useRoute();
   const loginRef: any = ref();
@@ -78,6 +89,10 @@
   const getCode = location.search;
   const code = getCode.split("?code=")[1];
   localStorage.setItem("code", code);
+  if (tokenStore.refresh_token === "null" && localStorage.getItem("code") === "undefined") {
+    console.log(1111111111111111111);
+    isShow.value = true;
+  }
   // 通过code获取token
   if (getCode.length > 1 && tokenStore.access_token === "null") {
     tokenStore.useCodeGetToken().then(async () => {
@@ -90,7 +105,12 @@
   // 刷新AudioControl
   const {controlAudioKey} = storeToRefs(useGetAudio());
   
-  const loginUrl = "https://openapi.alipan.com/oauth/authorize?client_id=f3bc86ad8618424d99beb9da421d5526&redirect_uri=http://localhost:1420/PlayList/&scope=user:base,file:all:read,file:all:write";
+  const loginUrl =
+      'https://openapi.alipan.com/oauth/authorize' +
+      '?client_id=f3bc86ad8618424d99beb9da421d5526' +
+      '&redirect_uri=oob' +
+      '&scope=user:base,file:all:read,file:all:write';
+  
   const isLoggedIn = ref(false);
   const token = ref(JSON.parse(localStorage.getItem("token") as string));
   
@@ -109,6 +129,12 @@
 </script>
 
 <style scoped>
+  .test {
+    width: 100px;
+    height: 100px;
+    background-color: black;
+  }
+  
   
   /* 全局样式 */
   body {
