@@ -1,60 +1,76 @@
 <template>
-  <div class="app">
-    <div class="app-header">
-      <div class="logo">
-        <img src="../assets/logo.png" alt="">
-      </div>
-      <div class="nav-items">
-        <div class="login">
-          <a v-if="!isLoggedIn" ref="loginRef" @click="test">请先登录</a>
-          <span v-else @click="logOut">退出登录</span>
+  <div class="app md-theme-dark">
+    
+    <div class="loginPopup scrim" v-show="isShow">
+      <div class="dialog-card surface-container-high">
+        <div class="dialog-header">
+          <div class="icon-area">🔐</div>
+          <h3>需要授权</h3>
         </div>
-        <div class="test" v-show="isShow"></div>
-        <div class="playListButton">
-          <router-link :to="{
-            path: '/PlayList',
-          }">
-            歌单
-          </router-link>
+        <p class="dialog-text">请先登录阿里云盘以获取完整体验</p>
+        
+        <div class="login-action">
+          <a v-if="!isLoggedIn" :href="loginUrl" class="md-text-button">
+            前往网页登录
+          </a>
         </div>
-        <div class="musicLibraryButton">
-          <router-link :to="{
-            path: '/MusicLibrary',
-          }">
-            曲库
-          </router-link>
+        
+        <div class="input-field-container">
+          <input type="text" placeholder=" " ref="codeInput" class="md-input">
+          <label class="floating-label">请输入授权码</label>
         </div>
-        <div class="synchronousButton">
-          <router-link :to="{
-            path: '/DataSync',
-          }">
-            同步数据
-          </router-link>
-        </div>
-        <div class="settingButton">
-          <router-link :to="{
-            path: '/Setting',
-          }">
-            设置
-          </router-link>
+        
+        <div class="dialog-actions">
+          <div @click="()=>{isShow=false}" class="md-text-button">取消</div>
+          <div @click="getToken" class="md-filled-button">确定</div>
         </div>
       </div>
     </div>
-    <suspense>
-      <template v-slot:default>
-        <router-view class="router-view" v-if="route.name === 'PlayList'" v-model:count="count"/>
-        <router-view class="router-view" v-else-if="route.name === 'AudioView'" :key="controlAudioKey+count"/>
-        <router-view class="router-view" v-else/>
-      </template>
-    </suspense>
     
-    <div class="audioControl">
+    <header class="app-header surface">
+      <div class="logo">
+        <img src="../assets/logo.png" alt="Logo">
+      </div>
+      
+      <nav class="nav-items">
+        <div class="nav-chip login-chip">
+          <a v-if="!isLoggedIn" :href="loginUrl" class="md-chip">登录</a>
+          <span v-else @click="logOut" class="md-chip">退出</span>
+        </div>
+        
+        <div class="nav-chip playListButton">
+          <router-link to="/PlayList" class="md-chip">歌单</router-link>
+        </div>
+        <div class="nav-chip musicLibraryButton">
+          <router-link to="/MusicLibrary" class="md-chip">曲库</router-link>
+        </div>
+        <div class="nav-chip synchronousButton">
+          <router-link to="/DataSync" class="md-chip">同步</router-link>
+        </div>
+        <div class="nav-chip settingButton">
+          <router-link to="/Setting" class="md-chip">设置</router-link>
+        </div>
+      </nav>
+    </header>
+    
+    <main class="main-content surface-background">
+      <suspense>
+        <template v-slot:default>
+          <router-view class="router-view" v-if="route.name === 'PlayList'" v-model:count="count"/>
+          <router-view class="router-view" v-else-if="route.name === 'AudioView'" :key="controlAudioKey+count"/>
+          <router-view class="router-view" v-else/>
+        </template>
+      </suspense>
+      <div class="bottom-spacer"></div>
+    </main>
+    
+    <div class="audioControl surface-container">
       <Suspense>
         <template v-slot:default>
           <AudioControl :key="controlAudioKey+count"></AudioControl>
         </template>
         <template v-slot:fallback>
-          加载中
+          <div class="loading-text">加载组件中...</div>
         </template>
       </Suspense>
     </div>
@@ -64,55 +80,56 @@
 <script setup lang="ts">
   import AudioControl from "./AudioControl.vue";
   import {useRoute} from 'vue-router';
+  // 假设这些 store 已定义在您的项目中
   import {useGetTokenStore} from "../store/token.ts";
   import {useGetAudio} from "../store/audio.ts";
   import {storeToRefs} from "pinia";
   import {RouterView, RouterLink} from "vue-router";
   import {ref, watch} from "vue";
+  // 假设这是 Tauri API
   import {invoke} from "@tauri-apps/api/core";
   
   const isShow = ref(false);
-  
-  // function test() {
-  //   isShow.value = true;
-  //   console.log("access_token:",tokenStore.access_token);
-  //   console.log("refresh_token:",tokenStore.refresh_token);
-  //   console.log("code:",localStorage.getItem("code"));
-  // }
-  
-  
+  const codeInput: any = ref();
   const count = ref(0);
   const route = useRoute();
-  const loginRef: any = ref();
-  // 获取得到的code
+  
   const tokenStore = useGetTokenStore();
-  const getCode = location.search;
-  const code = getCode.split("?code=")[1];
-  localStorage.setItem("code", code);
+  const code = ref("undefined");
+  localStorage.setItem("code", code.value);
   if (tokenStore.refresh_token === "null" && localStorage.getItem("code") === "undefined") {
-    console.log(1111111111111111111);
     isShow.value = true;
   }
-  // 通过code获取token
-  if (getCode.length > 1 && tokenStore.access_token === "null") {
-    tokenStore.useCodeGetToken().then(async () => {
-      const responseText: string = await invoke('get_drive_id', {
-        token: JSON.parse(<string>localStorage.getItem("token")).access_token
+  
+  function getToken() {
+    localStorage.setItem("code", codeInput.value.value);
+    if (codeInput.value.value !== "" && tokenStore.access_token === "null") {
+      tokenStore.useCodeGetToken().then(async () => {
+        const responseText: string = await invoke('get_drive_id', {
+          token: JSON.parse(<string>localStorage.getItem("token")).access_token
+        });
+        localStorage.setItem("drive_id", JSON.parse(responseText).backup_drive_id);
       });
-      localStorage.setItem("drive_id", JSON.parse(responseText).backup_drive_id);
-    });
+    }
+    if (tokenStore.refresh_token === "null" && localStorage.getItem("code") === "undefined") {
+      isShow.value = true;
+    }
   }
-  // 刷新AudioControl
+  
   const {controlAudioKey} = storeToRefs(useGetAudio());
   
   const loginUrl =
-      'https://openapi.alipan.com/oauth/authorize' +
-      '?client_id=f3bc86ad8618424d99beb9da421d5526' +
-      '&redirect_uri=oob' +
-      '&scope=user:base,file:all:read,file:all:write';
+    'https://openapi.alipan.com/oauth/authorize' +
+    '?client_id=f3bc86ad8618424d99beb9da421d5526' +
+    '&redirect_uri=oob' +
+    '&scope=user:base,file:all:read,file:all:write';
   
   const isLoggedIn = ref(false);
-  const token = ref(JSON.parse(localStorage.getItem("token") as string));
+  
+  // 避免在初始化时 JSON.parse(null) 导致错误
+  const storedToken = localStorage.getItem("token");
+  const initialToken = storedToken ? JSON.parse(storedToken) : {access_token: "null"};
+  const token = ref(initialToken);
   
   function logOut() {
     token.value.access_token = null;
@@ -121,143 +138,292 @@
   
   watch(token, () => {
     setTimeout(() => {
-      const token: any = localStorage.getItem("token");
-      const parsed = JSON.parse(token);
+      const storedToken = localStorage.getItem("token");
+      const parsed = storedToken ? JSON.parse(storedToken) : {access_token: "null"};
       isLoggedIn.value = parsed.access_token !== "null";
     }, 300);
   }, {immediate: true, deep: true});
 </script>
 
 <style scoped>
-  .test {
-    width: 100px;
-    height: 100px;
-    background-color: black;
+  /* =============================================
+     1. Design Tokens (布局变量)
+     ============================================= */
+  :root {
+    /* 保持您需要的颜色变量名，但其值假设已在其他地方定义或在全局样式中 */
+    --md-sys-color-primary: #D0BCFF;
+    --md-sys-color-on-primary: #381E72;
+    --md-sys-color-background: #141218;
+    --md-sys-color-on-background: #E6E1E5;
+    --md-sys-color-surface: #141218;
+    --md-sys-color-surface-container: #211F26;
+    --md-sys-color-surface-container-high: #2B2930;
+    --md-sys-color-on-surface: #E6E1E5;
+    --md-sys-color-on-surface-variant: #CAC4D0;
+    --md-sys-color-outline: #938F99;
+    --md-sys-color-secondary-container: #4A4458;
+    --md-sys-color-on-secondary-container: #E8DEF8;
+
+    /* --- 关键样式变量 (使用 rem) --- */
+    --header-height: 4rem;      /* 64dp */
+    --bottom-player-height: 5.5rem; /* 88dp 左右 */
   }
-  
-  
-  /* 全局样式 */
-  body {
-    margin: 0;
-    font-family: 'Roboto', system-ui, sans-serif;
-  }
-  
-  /* 活动路由链接样式 */
-  .router-link-active {
-    color: var(--md-sys-color-primary) !important;
-    font-weight: bold;
-    position: relative;
-  }
-  
-  .router-link-active::after {
-    content: '';
-    position: absolute;
-    bottom: -8px;
-    left: 0;
-    right: 0;
-    height: 3px;
-    background-color: var(--md-sys-color-primary);
-    border-radius: 2px;
-  }
-  
-  /* 按钮悬停效果 */
-  a, span[role="button"] {
-    cursor: pointer;
-    transition: all 0.2s ease;
-  }
-  
-  a:hover, span[role="button"]:hover {
-    opacity: 0.8;
-  }
-  
-  
-  /* 全局使用 MD3 变量 */
+
+  /* =============================================
+     2. App 布局
+     ============================================= */
   .app {
     display: flex;
     flex-direction: column;
-    min-height: 100vh;
+    height: 100vh;
+    width: 100vw;
     background-color: var(--md-sys-color-background);
     color: var(--md-sys-color-on-background);
-    transition: background-color 0.3s, color 0.3s;
+    font-family: 'Roboto', sans-serif;
+    overflow: hidden;
   }
-  
-  /* 顶部导航栏样式 */
-  .app-header {
+
+  /* =============================================
+     3. 弹窗样式 (Dialog Style) - MD3 规范，圆角直接赋值
+     ============================================= */
+  .scrim {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background-color: rgba(0, 0, 0, 0.6);
+    backdrop-filter: blur(0.125rem);
+    z-index: 100;
     display: flex;
-    justify-content: space-between;
     align-items: center;
-    padding: 0 24px;
-    height: 10vh;
-    max-height: 80px;
+    justify-content: center;
+  }
+
+  .dialog-card {
+    width: 85vw;
+    max-width: 24rem;
+    min-width: 17.5rem;
     background-color: var(--md-sys-color-surface-container-high);
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-    border-bottom: 1px solid var(--md-sys-color-outline-variant);
-  }
-  
-  .logo img {
-    margin-top: 8px;
-    width: 60px;
-    height: 40px;
-  }
-  
-  .nav-items {
+
+    /* MD3 Dialog 标准圆角 (28dp -> 1.75rem) */
+    border-radius: 1.75rem;
+    overflow: hidden;
+
+    box-shadow: 0 0.5rem 1rem 0.2rem rgba(0, 0, 0, 0.4);
+    padding: 1.5rem;
     display: flex;
-    gap: 24px;
-    align-items: center;
+    flex-direction: column;
+    gap: 1rem;
   }
-  
-  /* 导航项通用样式 */
-  .nav-items > div {
-    padding: 8px 16px;
-    border-radius: 20px;
-    transition: all 0.2s ease;
+
+  .icon-area {
+    font-size: 2.5rem;
+    max-font-size: 3rem;
   }
-  
-  /* 导航链接样式 */
-  .nav-items a, .nav-items span {
-    text-decoration: none;
-    font-weight: 500;
+
+  .dialog-header h3 {
+    margin: 0;
+    font-size: 1.5rem;
+    font-weight: 400;
     color: var(--md-sys-color-on-surface);
-    transition: color 0.2s;
   }
-  
-  /* 登录/退出样式 */
-  .login {
-    background-color: var(--md-sys-color-secondary-container);
-    color: var(--md-sys-color-on-secondary-container);
+
+  .dialog-text {
+    margin: 0;
+    font-size: 0.875rem;
+    color: var(--md-sys-color-on-surface-variant);
+    text-align: center;
+    line-height: 1.5;
   }
-  
-  .login a, .login span {
-    color: var(--md-sys-color-on-secondary-container);
+
+  /* 输入框 (MD3 Filled Text Field 风格) */
+  .input-field-container {
+    position: relative;
+    margin-top: 0.5rem;
+    background-color: rgba(208, 188, 255, 0.08);
+    /* Input field top corner radius (8dp -> 0.5rem) */
+    border-radius: 0.5rem 0.5rem 0 0;
+    border-bottom: 0.0625rem solid var(--md-sys-color-outline);
+  }
+
+  .md-input {
+    width: 100%;
+    border: none;
+    border-bottom: 0.125rem solid transparent;
+    background: transparent;
+    padding: 1.5rem 1rem 0.5rem;
+    font-size: 1rem;
+    color: var(--md-sys-color-on-surface);
+    outline: none;
+    transition: border 0.2s;
+  }
+
+  .md-input:focus {
+    border-bottom: 0.125rem solid var(--md-sys-color-primary);
+  }
+
+  .floating-label {
+    position: absolute;
+    left: 1rem;
+    top: 0.5rem;
+    font-size: 0.75rem;
+    color: var(--md-sys-color-outline);
+    pointer-events: none;
+    transition: all 0.2s;
+  }
+
+  .md-input:focus + .floating-label,
+  .md-input:not(:placeholder-shown) + .floating-label {
+    color: var(--md-sys-color-primary);
+    top: 0.25rem;
+  }
+
+  /* 弹窗按钮组 */
+  .dialog-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 0.5rem;
+    margin-top: 1.5rem;
+  }
+
+  /* M3 Text Button 样式 */
+  .md-text-button {
+    padding: 0.625rem 1.5rem;
+    /* Pill shape */
+    border-radius: 9999rem;
+    color: var(--md-sys-color-primary);
+    font-size: 0.875rem;
+    font-weight: 500;
+    cursor: pointer;
+    text-decoration: none;
+    transition: background-color 0.2s;
+  }
+
+  .md-text-button:hover {
+    background-color: rgba(208, 188, 255, 0.08);
+  }
+
+  /* M3 Filled Button 样式 */
+  .md-filled-button {
+    padding: 0.625rem 1.5rem;
+    background-color: var(--md-sys-color-primary);
+    color: var(--md-sys-color-on-primary);
+    /* Pill shape */
+    border-radius: 9999rem;
+    font-size: 0.875rem;
+    font-weight: 500;
+    cursor: pointer;
+    box-shadow: 0 0.0625rem 0.125rem rgba(0,0,0,0.3);
+    transition: opacity 0.2s, box-shadow 0.2s;
+  }
+
+  .md-filled-button:active {
+    opacity: 0.9;
+    box-shadow: 0 0.125rem 0.25rem rgba(0,0,0,0.4);
+  }
+
+  /* =============================================
+     4. Header & Nav (Top App Bar & Chips)
+     ============================================= */
+  .app-header {
+    height: var(--header-height);
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    padding: 0 4vw;
+    gap: 1rem;
+    background-color: var(--md-sys-color-surface);
+    border-bottom: 0.0625rem solid rgba(255,255,255,0.05);
+    z-index: 10;
+  }
+
+  .logo img {
+    height: 60%;
+    max-height: 2.25rem;
+    width: auto;
+    display: block;
+  }
+
+  .nav-items {
+    flex: 1;
+    display: flex;
+    overflow-x: auto;
+    gap: 0.5rem;
+    scrollbar-width: none;
+  }
+
+  .nav-items::-webkit-scrollbar { display: none; }
+
+  /* M3 Chip 基础样式 */
+  .md-chip {
+    display: inline-flex;
+    align-items: center;
+    height: 2rem;
+    padding: 0 1rem;
+    /* Pill shape */
+    border-radius: 9999rem;
+    border: 0.0625rem solid var(--md-sys-color-outline);
+    background-color: transparent;
+    color: var(--md-sys-color-on-surface-variant);
+    text-decoration: none;
+    font-size: 0.875rem;
+    font-weight: 500;
+    white-space: nowrap;
+    transition: background-color 0.2s, border-color 0.2s;
     cursor: pointer;
   }
-  
-  /* 导航项悬停效果 */
-  .playListButton:hover,
-  .musicLibraryButton:hover,
-  .synchronousButton:hover,
-  .settingButton:hover {
-    background-color: var(--md-sys-color-surface-container);
+
+  /* 激活状态 */
+  .nav-chip a.router-link-active.md-chip {
+    background-color: var(--md-sys-color-secondary-container);
+    color: var(--md-sys-color-on-secondary-container);
+    border: none;
   }
-  
-  .playListButton:hover a,
-  .musicLibraryButton:hover a,
-  .synchronousButton:hover a,
-  .settingButton:hover a {
+
+  /* 登录/退出 Chip 强调色 */
+  .login-chip .md-chip {
+    border-color: var(--md-sys-color-primary);
     color: var(--md-sys-color-primary);
   }
-  
-  /* 路由视图区域 */
-  .router-view {
-    padding: 24px;
-    background-color: var(--md-sys-color-surface);
+
+  /* =============================================
+     5. Main Content & Player
+     ============================================= */
+  .main-content {
+    flex: 1;
+    overflow-y: auto;
+    position: relative;
+    padding: 1rem;
+    background-color: var(--md-sys-color-background);
   }
-  
-  /* 音频控制栏 */
+
+  /* 底部间距 */
+  .bottom-spacer {
+    height: calc(var(--bottom-player-height) + 1rem);
+    width: 100%;
+  }
+
   .audioControl {
     position: fixed;
-    left: 0;
     bottom: 0;
+    left: 0;
     width: 100%;
+    height: var(--bottom-player-height);
+    background-color: var(--md-sys-color-surface-container);
+    /* 底部播放器顶部圆角 (24dp -> 1.5rem) */
+    border-top-left-radius: 1.5rem;
+    border-top-right-radius: 1.5rem;
+    z-index: 20;
+    box-shadow: 0 -0.25rem 0.5rem rgba(0,0,0,0.3);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0 4vw;
+  }
+
+  .loading-text {
+    color: var(--md-sys-color-on-surface-variant);
+    font-size: 0.875rem;
   }
 </style>
