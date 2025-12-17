@@ -13,6 +13,9 @@
       <!-- 左侧歌单列表 -->
       <ul class="playlist">
         <li class="title">歌单</li>
+        <li>
+          <button @click="addPlayList">添加歌单</button>
+        </li>
         <!-- 遍历歌单数据，并过滤搜索匹配项 -->
         <li
             v-for="(playlist, index) in filteredPlaylists"
@@ -23,9 +26,6 @@
             :title="Object.keys(playlist)[0]"
         >
           {{ Object.keys(playlist)[0] }}
-        </li>
-        <li>
-          <button @click="addPlayList">添加歌单</button>
         </li>
       </ul>
       
@@ -46,7 +46,6 @@
           <p class="number">序号</p>
           <p class="name">歌曲名称</p>
           <p class="type">文件类型</p>
-          <p class="duration">时长</p>
         </li>
         <!-- 遍历当前歌单中的歌曲，并过滤搜索匹配项 -->
         <li
@@ -61,7 +60,6 @@
           <p class="number">{{ index + 1 }}</p>
           <p class="name">{{ getFileName(song.name) }}</p>
           <p class="type">{{ getFileType(song.name) }}</p>
-          <p class="duration">{{ formatDuration(song.duration) }}</p>
         </li>
       </ul>
       
@@ -316,7 +314,6 @@
     emit('update:count', props.count + 0.1);
   }
   
-  
   // 获取文件名（不含后缀）
   function getFileName(name: string): string {
     return name.substring(0, name.lastIndexOf("."));
@@ -325,13 +322,6 @@
   // 获取文件后缀名
   function getFileType(name: string): string {
     return name.substring(name.lastIndexOf(".") + 1);
-  }
-  
-  // 格式化时长
-  function formatDuration(duration: number): string {
-    const minutes = Math.floor(duration / 60);
-    const seconds = Math.floor(duration % 60).toString().padStart(2, "0");
-    return `${minutes}:${seconds}`;
   }
   
   // 右键菜单控制
@@ -686,11 +676,10 @@
     cursor: default;
   }
   
-  /* 主体区域：左右分栏 */
+  /* 主体区域：上下分栏 */
   .playlistAndSong {
     margin-top: -15px;
     user-select: none;
-    display: flex;
     justify-content: space-evenly;
     align-items: flex-start;
     height: 72vh;
@@ -717,9 +706,10 @@
     max-height: 100%; /* ✅ 不允许超出红框 */
   }
   
-  /* ========== 左侧歌单列表 ========== */
+  /* ========== 上面歌单列表 ========== */
   .playlist {
-    width: 13%;
+    display: flex;
+    width:100%;
     background-color: var(--md-sys-color-surface-container-low);
     border-radius: 16px;
     overflow-y: auto;
@@ -788,9 +778,9 @@
   }
   
   
-  /* ========== 右侧歌曲列表 ========== */
+  /* ========== 下面歌曲列表 ========== */
   .songList {
-    width: 83%;
+    width: 100%;
     background-color: var(--md-sys-color-surface-container-low);
     border-radius: 16px;
     overflow-y: auto;
