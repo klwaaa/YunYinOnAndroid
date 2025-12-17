@@ -29,26 +29,26 @@
           <span class="iconfont icon-bofang" v-show="!isPlaying"></span>
         </button>
         <button @click="nextSong();debounceChooseSong();"><span class="iconfont icon-xiangyou2"></span></button>
+        <div class="volumeControl" ref="volumeControl">
+          <transition name="fade">
+            <el-slider
+                    v-show="showVolume"
+                    v-model="volume"
+                    :min="0"
+                    :max="100"
+                    :step="1"
+                    @input="updateVolume"
+                    show-tooltip
+                    vertical
+                    height="150px"
+                    class="volume-slider"
+            />
+          </transition>
+          <button class="volumeControlButton" @click="showVolumeControl">
+            <span class="iconfont icon-yinliangzhong"></span>
+          </button>
+        </div>
       </div>
-    </div>
-    <div class="volumeControl" ref="volumeControl">
-      <transition name="fade">
-        <el-slider
-            v-show="showVolume"
-            v-model="volume"
-            :min="0"
-            :max="100"
-            :step="1"
-            @input="updateVolume"
-            show-tooltip
-            vertical
-            height="150px"
-            class="volume-slider"
-        />
-      </transition>
-      <button class="volumeControlButton" @click="showVolumeControl">
-        <span class="iconfont icon-yinliangzhong"></span>
-      </button>
     </div>
   </div>
 </template>
@@ -520,7 +520,6 @@
 
 <style scoped>
   .audio-control {
-    display: flex;
     align-items: center;
     width: 100%;
     padding: 5px;
@@ -528,14 +527,11 @@
     border-top: 1px solid var(--md-sys-color-outline-variant);
     box-shadow: 0 -2px 8px rgba(0, 0, 0, 0.05);
     position: relative;
-    height: 13vh;
-    max-height: 90px;
+    height: 12vh;
   }
   
   
   .SongTitle {
-    height: 100%;
-    width: 25%;
     text-align: center;
     position: relative;
     margin: 1px 0 12px 0;
@@ -560,9 +556,8 @@
   
   
   .control_AudioDuration {
-    margin-bottom: -5px;
+    margin-top: -15px;
     display: flex;
-    width: 65%;
     flex-wrap: wrap;
   }
   
@@ -663,7 +658,7 @@
   
   .volume-slider {
     position: absolute;
-    left: 50%;
+    left: 70%;
     transform: translateX(-50%); /* 让其中心对齐到父元素中心 */
     bottom: 120px;
     z-index: 10; /* 新增：确保浮在上方，不被其他元素遮住 */
