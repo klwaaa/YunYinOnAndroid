@@ -28,10 +28,6 @@
     </div>
     
     <header class="app-header surface">
-      <div class="logo">
-        <img src="../assets/logo.png" alt="Logo">
-      </div>
-      
       <nav class="nav-items">
         <div class="nav-chip login-chip">
           <a v-if="!isLoggedIn" :href="loginUrl" class="md-chip">登录</a>
@@ -146,32 +142,6 @@
 </script>
 
 <style scoped>
-  /* =============================================
-     1. Design Tokens (布局变量)
-     ============================================= */
-  :root {
-    /* 保持您需要的颜色变量名，但其值假设已在其他地方定义或在全局样式中 */
-    --md-sys-color-primary: #D0BCFF;
-    --md-sys-color-on-primary: #381E72;
-    --md-sys-color-background: #141218;
-    --md-sys-color-on-background: #E6E1E5;
-    --md-sys-color-surface: #141218;
-    --md-sys-color-surface-container: #211F26;
-    --md-sys-color-surface-container-high: #2B2930;
-    --md-sys-color-on-surface: #E6E1E5;
-    --md-sys-color-on-surface-variant: #CAC4D0;
-    --md-sys-color-outline: #938F99;
-    --md-sys-color-secondary-container: #4A4458;
-    --md-sys-color-on-secondary-container: #E8DEF8;
-
-    /* --- 关键样式变量 (使用 rem) --- */
-    --header-height: 4rem;      /* 64dp */
-    --bottom-player-height: 5.5rem; /* 88dp 左右 */
-  }
-
-  /* =============================================
-     2. App 布局
-     ============================================= */
   .app {
     display: flex;
     flex-direction: column;
@@ -338,19 +308,13 @@
     z-index: 10;
   }
 
-  .logo img {
-    height: 60%;
-    max-height: 2.25rem;
-    width: auto;
-    display: block;
-  }
-
   .nav-items {
     flex: 1;
     display: flex;
     overflow-x: auto;
     gap: 0.5rem;
     scrollbar-width: none;
+    justify-content:space-around;
   }
 
   .nav-items::-webkit-scrollbar { display: none; }
@@ -404,22 +368,12 @@
     width: 100%;
   }
 
+  /* 音频控制栏 */
   .audioControl {
     position: fixed;
-    bottom: 0;
     left: 0;
+    bottom: 0;
     width: 100%;
-    height: var(--bottom-player-height);
-    background-color: var(--md-sys-color-surface-container);
-    /* 底部播放器顶部圆角 (24dp -> 1.5rem) */
-    border-top-left-radius: 1.5rem;
-    border-top-right-radius: 1.5rem;
-    z-index: 20;
-    box-shadow: 0 -0.25rem 0.5rem rgba(0,0,0,0.3);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    padding: 0 4vw;
   }
 
   .loading-text {
