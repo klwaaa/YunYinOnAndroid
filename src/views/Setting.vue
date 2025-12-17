@@ -25,10 +25,7 @@
 
 <style scoped>
   .setting {
-    display: flex;
-    height: 85vh;
-    max-height: calc(100vh - 140px);
-    width: 100vw;
+    width: 100%;
     margin-top: -5px;
     gap: 1vw;
     
@@ -40,10 +37,8 @@
   }
   
   .settingRouter {
-    width: 14%;
-    min-width: 12vw;
-    max-width: 18vw;
-    
+    width: 100%;
+    min-width: 100%;
     height: 100%;
     display: flex;
     flex-direction: column;
@@ -57,7 +52,7 @@
     
   }
   .ThemeColor {
-    width: 100%;
+    width: 20%;
     height: 6vh;
     
     display: flex;
