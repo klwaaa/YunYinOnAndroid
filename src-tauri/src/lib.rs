@@ -13,6 +13,8 @@ use serde::{Deserialize, Serialize};
 use material_colors::color::Argb;
 use material_colors::theme::{Theme, ThemeBuilder};
 
+use tauri::{plugin::{Builder, TauriPlugin}, Runtime};
+
 /// 阿里云 token 接口地址
 const TOKEN_URL: &str = "https://openapi.alipan.com/oauth/access_token";
 
@@ -43,6 +45,42 @@ fn ensure_app_file(app: &AppHandle, filename: &str) -> Result<PathBuf, String> {
     .map_err(|e| format!("无法创建目录: {}", e))?;
 
   Ok(dir.join(filename))
+}
+
+
+/// 初始化 keep_alive 插件
+///
+/// 作用：
+/// - 向前端暴露 start_keep_alive / stop_keep_alive
+/// - 真正的 Android 行为由 Kotlin 插件实现
+fn keep_alive_plugin<R: Runtime>() -> TauriPlugin<R> {
+  Builder::new("keep_alive")
+    // 这里注册 JS / 前端可调用的命令
+    .invoke_handler(tauri::generate_handler![
+            start_keep_alive,
+            stop_keep_alive
+        ])
+    .build()
+}
+
+/// 开始后台保活（Android 前台服务）
+///
+/// 前端调用：
+/// invoke("plugin:keep_alive|start_keep_alive")
+#[command]
+fn start_keep_alive() {
+  // Tauri 2.x 设计要求：
+  // Rust 端不接触 Android API
+  // 该命令会被 Android Plugin 中的 @Command 同名方法接管
+}
+
+/// 停止后台保活
+///
+/// 前端调用：
+/// invoke("plugin:keep_alive|stop_keep_alive")
+#[command]
+fn stop_keep_alive() {
+  // 同上，逻辑在 Android (Kotlin) 中
 }
 
 /// 使用授权码换取 token
@@ -427,6 +465,7 @@ fn update_theme_color(app: AppHandle, color_source: String) -> Result<(), String
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
   tauri::Builder::default()
+    .plugin(keep_alive_plugin())
     .invoke_handler(tauri::generate_handler![
             get_token_by_code,
             get_token_by_refresh,

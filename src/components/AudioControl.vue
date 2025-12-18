@@ -291,11 +291,13 @@
   
   
   // 控制播放
-  function control() {
+  async function control() {
     if (isPlaying.value) {
       isPlaying.value = false;
       clearAudioBufferSourceNode();
       clearInterval(interval);
+      // ⛔ 停止前台服务
+      await invoke("plugin:keep_alive|stop_keep_alive");
     } else {
       isPlaying.value = true;
       source = audioCtx.createBufferSource();
@@ -308,6 +310,8 @@
           currentAudioTime.value += 0.05;
         }, 50);
       }
+      // ▶️ 启动前台服务
+      await invoke("plugin:keep_alive|start_keep_alive");
     }
   }
   
