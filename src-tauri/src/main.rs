@@ -2,6 +2,6 @@
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
 
 fn main() {
-  // 调用 lib.rs 中的 run 函数
-  app_lib::run();
+    // 调用 lib.rs 中的 run 函数
+    app_lib::run();
 }

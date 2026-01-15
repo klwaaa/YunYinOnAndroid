@@ -19,7 +19,17 @@
 </template>
 
 <script setup lang="ts">
+import {invoke} from "@tauri-apps/api/core";
 
+try {
+  const notificationId = await invoke('simple_notification');
+
+  console.log('通知已发送，ID:', notificationId);
+  alert(`✅ 通知已发送！\nID: ${notificationId}`);
+} catch (error) {
+  console.error('发送通知失败:', error);
+  alert('❌ 发送通知失败: ' + error);
+}
 </script>
 
 
