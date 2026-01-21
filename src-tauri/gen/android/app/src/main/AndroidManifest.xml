@@ -38,6 +38,12 @@
             </intent-filter>
         </activity>
 
+        <!-- ⭐⭐⭐ 前台服务注册（关键）⭐⭐⭐ -->
+        <service
+                android:name=".MusicForegroundService"
+                android:exported="false"
+                android:foregroundServiceType="mediaPlayback" />
+
         <provider
           android:name="androidx.core.content.FileProvider"
           android:authorities="${applicationId}.fileprovider"

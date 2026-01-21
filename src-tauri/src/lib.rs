@@ -7,8 +7,9 @@ use serde_json::json;
 use std::fs::File;
 use std::io::{Read, Write};
 use std::path::PathBuf;
+use std::thread;
+use std::time::Duration;
 use tauri::{command, AppHandle, Manager};
-use tauri_plugin_notification::NotificationExt;
 
 use material_colors::color::Argb;
 use material_colors::theme::{Theme, ThemeBuilder};
@@ -416,52 +417,10 @@ fn update_theme_color(app: AppHandle, color_source: String) -> Result<(), String
     Ok(())
 }
 
-/// 通知参数结构体
-#[derive(Debug, Deserialize)]
-#[serde(rename_all = "camelCase")]
-pub struct NotificationParams {
-    /// 通知标题
-    pub title: String,
-    /// 通知内容
-    pub body: String,
-    /// 通知图标（Android 资源名称，如 "ic_notification"）
-    pub icon: Option<String>,
-    /// 通知 ID（用于更新或取消）
-    pub id: Option<i32>,
-    /// 点击通知后的行为
-    pub action: Option<String>,
-    /// 通知渠道 ID（Android 8.0+ 需要）
-    pub channel_id: Option<String>,
-    /// 进度（0-100，用于进度通知）
-    pub progress: Option<i32>,
-}
-
-/// 发送简单通知
-#[command]
-async fn simple_notification(app: AppHandle) -> Result<(), String> {
-    // 发送通知
-    match app
-        .notification()
-        .builder()
-        .title("Tauri")
-        .body("Tauri is awesome")
-        .show()
-    {
-        Ok(id) => {
-            println!("✅ 通知已发送");
-            Ok(())
-        }
-        Err(e) => {
-            eprintln!("❌ 发送通知失败: {:?}", e);
-            Err(format!("发送通知失败: {:?}", e))
-        }
-    }
-}
 /// Tauri 入口
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
     tauri::Builder::default()
-        .plugin(tauri_plugin_notification::init())
         .invoke_handler(tauri::generate_handler![
             get_token_by_code,
             get_token_by_refresh,
@@ -478,8 +437,7 @@ pub fn run() {
             complete_upload,
             material_colors,
             get_theme_color_from_local,
-            update_theme_color,
-            simple_notification
+            update_theme_color
         ])
         .run(tauri::generate_context!())
         .expect("运行 Tauri 应用失败");
