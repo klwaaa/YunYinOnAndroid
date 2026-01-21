@@ -534,6 +534,7 @@
   .SongTitle {
     text-align: center;
     position: relative;
+    white-space: nowrap;
     margin: 1px 0 12px 0;
     color: var(--md-sys-color-on-surface);
     font-weight: 500;

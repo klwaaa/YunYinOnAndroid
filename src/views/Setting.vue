@@ -8,7 +8,7 @@
             }"
             class="ThemeColor"
         >
-          主题颜色
+          <p>主题颜色</p>
         </router-link>
       </div>
     </div>
@@ -39,12 +39,12 @@
 .settingRouter {
   width: 100%;
   min-width: 100%;
-  height: 100%;
+  height: 6vh;
   display: flex;
   flex-direction: column;
   gap: 1vh;
 
-  padding: 1.5vh 0.6vw;
+  padding: 1vh 3vw;
   box-sizing: border-box;
 
   background: var(--md-sys-color-surface-container);
@@ -71,6 +71,10 @@
   background: transparent;
 
   transition: background 0.25s ease, color 0.25s ease;
+}
+
+.ThemeColor p{
+  font-size: 1.6vh;
 }
 
 .ThemeColor:hover {

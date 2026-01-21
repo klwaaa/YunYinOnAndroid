@@ -55,5 +55,7 @@
 </script>
 
 <style scoped>
-
+.light{
+  padding-top: 5vh;
+}
 </style>

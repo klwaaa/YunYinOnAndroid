@@ -4,7 +4,6 @@
     <div class="loginPopup scrim" v-show="isShow">
       <div class="dialog-card surface-container-high">
         <div class="dialog-header">
-          <div class="icon-area">🔐</div>
           <h3>需要授权</h3>
         </div>
         <p class="dialog-text">请先登录阿里云盘以获取完整体验</p>
@@ -105,6 +104,8 @@ function getToken() {
         token: JSON.parse(<string>localStorage.getItem("token")).access_token
       });
       localStorage.setItem("drive_id", JSON.parse(responseText).backup_drive_id);
+      isLoggedIn.value = true;
+      isShow.value = false;
     });
   }
   if (tokenStore.refresh_token === "null" && localStorage.getItem("code") === "undefined") {
@@ -145,7 +146,7 @@ watch(token, () => {
 .app {
   display: flex;
   flex-direction: column;
-  height: 100vh;
+  height: 95vh;
   width: 100vw;
   background-color: var(--md-sys-color-background);
   color: var(--md-sys-color-on-background);
@@ -187,10 +188,6 @@ watch(token, () => {
   gap: 1rem;
 }
 
-.icon-area {
-  font-size: 2.5rem;
-  max-font-size: 3rem;
-}
 
 .dialog-header h3 {
   margin: 0;

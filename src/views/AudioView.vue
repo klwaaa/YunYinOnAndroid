@@ -82,7 +82,7 @@
     };
     
     axios(config).then((response) => {
-      lyricContainer.value?.addEventListener("wheel", () => {
+      lyricContainer.value?.addEventListener("touchmove", () => {
         isUserScrolling.value = true;
       });
       const rawLrc = response.data;
@@ -201,11 +201,11 @@
   }
   
   .lyric {
-    height: 100%;
+    height: 90%;
     overflow-y: auto;
     position: relative;
     scroll-behavior: smooth;
-    padding: 16px 24px 24px 100px;
+    padding: 16px 24px 24px 2.5vh;
     line-height: 1.6;
     font-size: 16px;
     font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
@@ -273,7 +273,7 @@
     display: flex;
     align-items: center;
     left: 5%;
-    top: 100%;
+    top: 98%;
     gap: 12px;
     background-color: var(--md-sys-color-surface-container);
     border-radius: 24px;
@@ -312,7 +312,7 @@
   .followTime {
     position: absolute;
     right: 5%;
-    top: calc(100% + 20px);
+    top: calc(97% + 20px);
     border-radius: 24px;
     border: none;
     background-color: var(--md-sys-color-surface-container-high);

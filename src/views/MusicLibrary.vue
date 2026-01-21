@@ -126,7 +126,7 @@
 
 <style scoped>
   .musicLibrary_view {
-    height: calc(100vh - 150px);
+    height: calc(95vh - 156px);
     overflow: hidden;
   }
   .prompt {

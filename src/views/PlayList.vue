@@ -683,7 +683,7 @@
     justify-content: space-evenly;
     align-items: flex-start;
     height: 72vh;
-    max-height: calc(100vh - 260px);
+    max-height: calc(95vh - 260px);
     overflow: hidden; /* 关键点 */
   }
 
