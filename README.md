@@ -1,20 +1,21 @@
 <h1 align="center">云音</h1>
 
 ## 应用介绍：
-    应用是基于Tauri 2.0 + Vue 3的阿里云盘音乐播放器
-
+    应用是基于Tauri 2.0 + Vue 3的阿里云盘安卓音乐播放器
+## windows版：
+### https://github.com/klwaaa/YunYin
 ## 二次开发须知：
-### _请把项目中main.rs中的client_id和client_secret改为自己的App Id和App Secret_
+### _请把项目中lib.rs中的client_id和client_secret改为自己的App Id和App Secret_
+### 配置好安卓环境运行 `npm run tauri android init`
 ### 开发模式  
-`npm run tauri dev`
-### 构建安装包（Windows）
-`npm run tauri build`
+`npm run tauri android dev`
+### 构建安装包（android）
+`npm run tauri android build`
 
 ## 未来可能新增：
 * 更多主题配色
 * 更多网盘支持
 * 支持音乐库中多文件夹
-* windows系统托盘
 * 更多操作是否成功提示
 * 获取音频数据超时后从新获取
 * 应用更新检查
