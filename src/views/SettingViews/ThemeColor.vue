@@ -134,7 +134,7 @@
     margin: auto;
     text-align: center;
     width: 90%;
-    height: 90%;
+    height: 40vh;
     background-size: contain;
     background-position: center;
     background-repeat: no-repeat;
@@ -143,7 +143,6 @@
     justify-content: center;
     color: var(--md-sys-color-on-surface-variant);
     font-size: clamp(0.9rem, 1.5vw, 1.2rem);
-    padding: 2vh;
     word-break: break-word;
   }
   
@@ -277,24 +276,6 @@
       max-width: 85vw;
       top: 10vh;
       padding: 1.2vh 4vw;
-    }
-  }
-  
-  @media (max-width: 480px) {
-    .upload-area {
-      min-height: 35vh;
-      border-width: 0.15rem;
-    }
-    
-    .upload-hint {
-      font-size: clamp(0.8rem, 4vw, 1rem);
-      padding: 1vh;
-    }
-    
-    .select-button, .createTeme {
-      width: 80%;
-      min-width: 55vw;
-      padding: 1.8vh 5vw;
     }
   }
 </style>
