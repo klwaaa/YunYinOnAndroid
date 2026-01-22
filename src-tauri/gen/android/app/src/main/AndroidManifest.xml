@@ -24,6 +24,12 @@
         android:label="@string/app_name"
         android:theme="@style/Theme.app"
         android:usesCleartextTraffic="${usesCleartextTraffic}">
+
+        <service
+                android:name=".KeepAliveService"
+                android:exported="false"
+                android:foregroundServiceType="mediaPlayback" />
+
         <activity
             android:configChanges="orientation|keyboardHidden|keyboard|screenSize|locale|smallestScreenSize|screenLayout|uiMode"
             android:launchMode="singleTask"
