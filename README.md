@@ -2,8 +2,10 @@
 
 ## 应用介绍：
     应用是基于Tauri 2.0 + Vue 3的阿里云盘安卓音乐播放器
+    
 ## windows版：
 ### https://github.com/klwaaa/YunYin
+
 ## 二次开发须知：
 ### _请把项目中lib.rs中的client_id和client_secret改为自己的App Id和App Secret_
 ### 配置好安卓环境运行 `npm run tauri android init`
