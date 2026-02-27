@@ -682,8 +682,8 @@
     user-select: none;
     justify-content: space-evenly;
     align-items: flex-start;
-    height: 72vh;
-    max-height: calc(95vh - 260px);
+    height: 68vh;
+    padding-bottom: 8vh;
     overflow: hidden; /* 关键点 */
   }
 
@@ -703,7 +703,7 @@
 
   .playlist, .songList {
     overflow-y: auto; /* ✅ 出现滚动条 */
-    max-height: 100%; /* ✅ 不允许超出红框 */
+    max-height: 100%;
   }
 
   /* ========== 上面歌单列表 ========== */
