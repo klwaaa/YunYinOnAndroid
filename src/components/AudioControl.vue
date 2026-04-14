@@ -269,7 +269,6 @@
       controller.abort();
     }
     controllers.length = 0;
-    iterationsGroupCount = iterationsGroup + 1;
   }
   
   
@@ -291,13 +290,11 @@
   
   
   // 控制播放
-  async function control() {
+  function control() {
     if (isPlaying.value) {
       isPlaying.value = false;
       clearAudioBufferSourceNode();
       clearInterval(interval);
-      // ⛔ 停止前台服务
-      await invoke("plugin:keep_alive|stop_keep_alive");
     } else {
       isPlaying.value = true;
       source = audioCtx.createBufferSource();
@@ -310,8 +307,6 @@
           currentAudioTime.value += 0.05;
         }, 50);
       }
-      // ▶️ 启动前台服务
-      await invoke("plugin:keep_alive|start_keep_alive");
     }
   }
   
@@ -337,7 +332,7 @@
       shuffledIndex.value = controlAudioKeyCount;
       for (let i = 0; i < playList.length; i++) {
         if (playList[i].name.substring(0, playList[i].name.lastIndexOf(".")) ===
-            randomPlaylist[shuffledIndex.value].name.substring(0, randomPlaylist[shuffledIndex.value].name.lastIndexOf("."))) {
+          randomPlaylist[shuffledIndex.value].name.substring(0, randomPlaylist[shuffledIndex.value].name.lastIndexOf("."))) {
           controlAudioKey.value = i;
           break;
         }
@@ -370,7 +365,6 @@
   async function getSegmentData() {
     const controller = new AbortController();
     controllers.push(controller);
-    
     let rangeHeader: string;
     if (iterationsCount < iterations) {
       dataPosition += dataSize;
@@ -384,37 +378,27 @@
       return null; // 超出则不再请求
     }
     
-    try {
-      const response = await fetch(audioUrl, {
-        method: "GET",
-        cache: "no-store",
-        headers: {
-          "Range": rangeHeader
-        },
-        signal: controller.signal
-      });
-      
-      if (!response.ok) {
-        console.error(`请求失败: ${response.status} ${response.statusText}`);
-        dataPosition -= 800000;
-        iterationsCount--;
-        throw new Error(`请求失败: ${response.status}`);
-      }
-      return await response.blob();
-      
-    } catch (err: any) {
-      if (err.name === "AbortError") {
-        console.warn("请求已取消:", rangeHeader);
-      } else {
-        dataPosition -= 800000;
-        iterationsCount--;
-        console.error("请求出错:", err);
-        throw new Error(`请求失败`);
-      }
+    
+    const response = await fetch(audioUrl, {
+      method: "GET",
+      cache: "no-store",
+      headers: {
+        "Range": rangeHeader
+      },
+      signal: controller.signal
+    });
+    
+    if (!response.ok) {
+      dataPosition -= 800000;
+      iterationsCount--;
+      throw new Error(`请求失败: ${response.status}`);
     }
+    return await response.blob();
+    
   }
   
   let getAudioDataErr: any;
+  let getAudioDataSuccess: any;
   
   // 分段获取音频文件
   async function getAudioData() {
@@ -455,17 +439,17 @@
       // 音频链接播放
       if (iterationsGroup >= iterationsGroupCount) {
         iterationsGroupCount++;
-        setTimeout(getAudioData, 500);
+        getAudioDataSuccess = setTimeout(getAudioData, 500);
       }
     }).catch(() => {
-      getAudioDataErr = setTimeout(getAudioData, 5000);
+      getAudioDataErr = setTimeout(getAudioData, 12000);
     });
   }
   
   
   let interval: any = null;
   
-  const timeout = setTimeout(getAudioData, 6000);
+  const timeout = setTimeout(getAudioData, 5000);
   
   usePlaybackMode();
   const displayTimeInterval = setInterval(() => {
@@ -473,35 +457,35 @@
   }, 1000);
   
   watch(
-      displayTime,
-      (newTime, oldTime) => {
-        if (isPlaying.value) {
-          if (oldTime >= globalAudioBufferDuration.value) {
-            clearInterval(interval);
-            interval = null;
-          } else {
-            if (interval === null) {
-              interval = setInterval(() => {
-                currentAudioTime.value += 0.05;
-              }, 50);
-            }
-          }
-        }
-        if (newTime >= audioDuration.value && iterationsGroupCount !== 0) {
-          if (playbackModeIndex.value !== 1) {
-            nextSong();
-            debounceChooseSong();
-          } else {
-            currentAudioTime.value = 0;
-            handleChange();
-            setTimeout(() => {
-              interval = setInterval(() => {
-                currentAudioTime.value += 0.05;
-              }, 50);
+    displayTime,
+    (newTime, oldTime) => {
+      if (isPlaying.value) {
+        if (oldTime >= globalAudioBufferDuration.value) {
+          clearInterval(interval);
+          interval = null;
+        } else {
+          if (interval === null) {
+            interval = setInterval(() => {
+              currentAudioTime.value += 0.05;
             }, 50);
           }
         }
-      }, {deep: true}
+      }
+      if (newTime >= audioDuration.value && iterationsGroupCount !== 0) {
+        if (playbackModeIndex.value !== 1) {
+          nextSong();
+          debounceChooseSong();
+        } else {
+          currentAudioTime.value = 0;
+          handleChange();
+          setTimeout(() => {
+            interval = setInterval(() => {
+              currentAudioTime.value += 0.05;
+            }, 50);
+          }, 50);
+        }
+      }
+    }, {deep: true}
   );
   
   onUnmounted(async () => {
@@ -509,6 +493,7 @@
     document.removeEventListener('click', handleClickOutside);
     emitter.off("handleChange", handleChange);
     clearTimeout(getAudioDataErr);
+    clearTimeout(getAudioDataSuccess);
     clearInterval(interval);
     clearTimeout(timeout);
     clearInterval(displayTimeInterval);
