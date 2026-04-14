@@ -1,24 +1,36 @@
 package com.YunYin.app
 
+import android.content.Intent
+import android.os.Build
 import android.os.Bundle
-import com.tauri.TauriActivity
-import com.tauri.webview.TauriWebView
-import com.tauri.plugin.PluginRegistry
+import androidx.activity.enableEdgeToEdge
 
 class MainActivity : TauriActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
+        enableEdgeToEdge()
         super.onCreate(savedInstanceState)
-        enableEdgeToEdge() // 状态栏沉浸
+
+        startForegroundServiceIfNeeded()
     }
 
-    override fun registerPlugins(registry: PluginRegistry, webview: TauriWebView) {
-        super.registerPlugins(registry, webview)
-        KeepAlivePlugin.register(this, webview)
-    }
+    /**
+     * 应用启动时立刻开启前台服务
+     */
+    private fun startForegroundServiceIfNeeded() {
+        val intent = Intent(this, MusicForegroundService::class.java)
 
-    override fun onWebViewCreated(webview: TauriWebView) {
-        super.onWebViewCreated(webview)
-        // 可在此做 WebView 相关操作
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            /**
+             * Android 8+
+             * 必须使用 startForegroundService
+             */
+            startForegroundService(intent)
+        } else {
+            /**
+             * Android 7 及以下
+             */
+            startService(intent)
+        }
     }
 }
