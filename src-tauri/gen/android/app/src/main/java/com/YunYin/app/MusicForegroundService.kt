@@ -37,7 +37,7 @@ class MusicForegroundService : Service() {
             .build()
 
         // ⭐ 关键：真正变成前台服务
-        startForeground(NOTIFICATION_ID, notification)
+        //startForeground(NOTIFICATION_ID, notification)
 
         /**
          * START_STICKY：
