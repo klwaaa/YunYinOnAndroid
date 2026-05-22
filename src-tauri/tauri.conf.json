@@ -24,7 +24,9 @@
           "identifier": "greet-capability",
           "description": "Allows the main window to greet users.",
           "windows": ["main"],
-          "permissions": ["core:default"]
+          "permissions": [
+            "core:default"
+          ]
         }
       ]
     }
