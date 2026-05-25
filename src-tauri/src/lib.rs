@@ -46,8 +46,8 @@ fn ensure_app_file(app: &AppHandle, filename: &str) -> Result<PathBuf, String> {
 /// 使用授权码换取 token
 #[command]
 async fn get_token_by_code(code: String) -> Result<String, String> {
-    let client_id = "应用id";
-    let client_secret = "应用密钥";
+    let client_id = "f3bc86ad8618424d99beb9da421d5526";
+    let client_secret = "2def6c4b6b034206811689b6115b5bc2";
 
     let client = Client::new();
     let res = client
@@ -75,8 +75,8 @@ async fn get_token_by_code(code: String) -> Result<String, String> {
 /// 使用 refresh_token 刷新 token
 #[command]
 async fn get_token_by_refresh(refresh_token: String) -> Result<String, String> {
-    let client_id = "应用id";
-    let client_secret = "应用密钥";
+    let client_id = "f3bc86ad8618424d99beb9da421d5526";
+    let client_secret = "2def6c4b6b034206811689b6115b5bc2";
 
     let client = Client::new();
     let res = client
@@ -419,6 +419,7 @@ fn update_theme_color(app: AppHandle, color_source: String) -> Result<(), String
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
     tauri::Builder::default()
+        .plugin(tauri_plugin_media_notification::init())
         .invoke_handler(tauri::generate_handler![
             get_token_by_code,
             get_token_by_refresh,

@@ -25,7 +25,8 @@
           "description": "Allows the main window to greet users.",
           "windows": ["main"],
           "permissions": [
-            "core:default"
+            "core:default",
+            "media-notification:default"
           ]
         }
       ]

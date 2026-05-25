@@ -20,19 +20,47 @@ class PingArgs {
   var value: String? = null
 }
 
+@InvokeArg
+class MediaNotificationArgs {
+    var title: String? = null      // 歌曲名
+    var isPlaying: Boolean = false // 当前是否正在播放
+}
+
 @TauriPlugin
 class ExamplePlugin(private val activity: Activity): Plugin(activity) {
     private val implementation = Example()
 
-    override fun load(webView: WebView) {
+    @Command
+    fun startNotification(invoke: Invoke) {
+
+
+        // Android 13 通知权限
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-            if (ContextCompat.checkSelfPermission(activity, Manifest.permission.POST_NOTIFICATIONS)
-                != PackageManager.PERMISSION_GRANTED) {
-                ActivityCompat.requestPermissions(activity, arrayOf(Manifest.permission.POST_NOTIFICATIONS), 0)
+
+            if (
+                ContextCompat.checkSelfPermission(
+                    activity,
+                    Manifest.permission.POST_NOTIFICATIONS
+                ) != PackageManager.PERMISSION_GRANTED
+            ) {
+
+                ActivityCompat.requestPermissions(
+                    activity,
+                    arrayOf(Manifest.permission.POST_NOTIFICATIONS),
+                    1001
+                )
+
+                invoke.reject("Notification permission not granted")
+                return
             }
         }
-        // 初始化时启动前台服务
+
         startForegroundService()
+
+        val ret = JSObject()
+        ret.put("success", true)
+
+        invoke.resolve(ret)
     }
 
     private fun startForegroundService() {

@@ -4,22 +4,7 @@ Default permissions for the plugin
 
 #### This default permission set includes the following:
 
-- `allow-is-permission-granted`
-- `allow-request-permission`
-- `allow-notify`
-- `allow-register-action-types`
-- `allow-register-listener`
-- `allow-cancel`
-- `allow-get-pending`
-- `allow-remove-active`
-- `allow-get-active`
-- `allow-check-permissions`
-- `allow-show`
-- `allow-batch`
-- `allow-list-channels`
-- `allow-delete-channel`
-- `allow-create-channel`
-- `allow-permission-state`
+- `allow-start-notification`
 
 ## Permission Table
 
@@ -52,6 +37,32 @@ Enables the ping command without any pre-configured scope.
 <td>
 
 Denies the ping command without any pre-configured scope.
+
+</td>
+</tr>
+
+<tr>
+<td>
+
+`media-notification:allow-start-notification`
+
+</td>
+<td>
+
+Enables the start_notification command without any pre-configured scope.
+
+</td>
+</tr>
+
+<tr>
+<td>
+
+`media-notification:deny-start-notification`
+
+</td>
+<td>
+
+Denies the start_notification command without any pre-configured scope.
 
 </td>
 </tr>

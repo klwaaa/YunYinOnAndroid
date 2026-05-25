@@ -24,12 +24,20 @@ class ExampleForegroundService : Service() {
         createNotificationChannel()
     }
 
-    override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
-        val notification = buildNotification()
-        startForeground(NOTIFICATION_ID, notification)
-        // 如果不需要后台持续运行，可以在完成工作后调用 stopForeground() 或 stopSelf()
-        return START_STICKY // 或 START_NOT_STICKY，根据需求
-    }
+override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
+
+    val title = intent?.getStringExtra("title") ?: "未知歌曲"
+    val playing = intent?.getBooleanExtra("playing", false) ?: false
+
+    val notification = buildNotification(
+        title,
+        playing
+    )
+
+    startForeground(NOTIFICATION_ID, notification)
+
+    return START_STICKY
+}
 
     private fun createNotificationChannel() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {

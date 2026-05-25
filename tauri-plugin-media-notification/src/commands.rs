@@ -1,8 +1,8 @@
-use tauri::{AppHandle, command, Runtime};
+use tauri::{command, AppHandle, Runtime};
 
 use crate::models::*;
-use crate::Result;
 use crate::MediaNotificationExt;
+use crate::Result;
 
 #[command]
 pub(crate) async fn ping<R: Runtime>(
@@ -10,4 +10,9 @@ pub(crate) async fn ping<R: Runtime>(
     payload: PingRequest,
 ) -> Result<PingResponse> {
     app.media_notification().ping(payload)
+}
+
+#[command]
+pub(crate) fn start_notification<R: Runtime>(app: AppHandle<R>) -> Result<Notification> {
+    app.media_notification().start_notification()
 }

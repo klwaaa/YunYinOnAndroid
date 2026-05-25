@@ -31,4 +31,9 @@ impl<R: Runtime> MediaNotification<R> {
       .run_mobile_plugin("ping", payload)
       .map_err(Into::into)
   }
+  pub fn start_notification(&self) -> crate::Result<Notification> {
+    self.0
+      .run_mobile_plugin("startNotification",())
+      .map_err(Into::into)
+  }
 }
