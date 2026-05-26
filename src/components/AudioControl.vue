@@ -89,11 +89,64 @@
     playingPlayList
   } = storeToRefs(useGetAudio());
   
-  invoke("plugin:media-notification|start_notification").then(() => {
-    console.log("start_notification");
+  
+  invoke("plugin:media-notification|start_notification", {
+    notificationArgs: {
+      songTitle: "111111",
+      isPlaying: false
+    }
+  }).then((res) => {
+    console.log("启动成功", res);
   }).catch((err) => {
-    console.log(err);
+    console.error("启动失败", err);
   });
+  
+  import { addPluginListener } from "@tauri-apps/api/core"
+  
+  // 播放暂停
+  addPluginListener(
+      "media-notification",
+      "playpause",
+      () => {
+        
+        console.log("点击播放暂停")
+        
+        // 这里控制真正 audio 播放
+      }
+  ).then(()=>{
+    console.log("添加播放暂停监听成功");
+  }).catch((err) => {
+    console.log("添加播放暂停监听失败",err);
+  })
+  
+  // 上一曲
+  addPluginListener(
+      "media-notification",
+      "previous",
+      () => {
+        
+        console.log("上一曲")
+      }
+  ).then(()=>{
+    console.log("添加上一曲监听成功");
+  }).catch((err) => {
+    console.log("添加上一曲监听失败",err);
+  })
+  
+  // 下一曲
+  addPluginListener(
+      "media-notification",
+      "next",
+      () => {
+        
+        console.log("下一曲")
+      }
+  ).then(()=>{
+    console.log("添加下一曲监听成功");
+  }).catch((err) => {
+    console.log("添加下一曲监听失败",err);
+  })
+  
   
   watch(playbackModeIndex, (newIndex) => {
     playbackModeIndex.value = newIndex;

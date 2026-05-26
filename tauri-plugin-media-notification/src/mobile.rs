@@ -25,15 +25,9 @@ pub fn init<R: Runtime, C: DeserializeOwned>(
 pub struct MediaNotification<R: Runtime>(PluginHandle<R>);
 
 impl<R: Runtime> MediaNotification<R> {
-  pub fn ping(&self, payload: PingRequest) -> crate::Result<PingResponse> {
-    self
-      .0
-      .run_mobile_plugin("ping", payload)
-      .map_err(Into::into)
-  }
-  pub fn start_notification(&self) -> crate::Result<Notification> {
+  pub fn start_notification(&self, notification_args:NotificationArgs) -> crate::Result<Notification> {
     self.0
-      .run_mobile_plugin("startNotification",())
+      .run_mobile_plugin("startNotification",notification_args)
       .map_err(Into::into)
   }
 }

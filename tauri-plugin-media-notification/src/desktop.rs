@@ -14,9 +14,5 @@ pub fn init<R: Runtime, C: DeserializeOwned>(
 pub struct MediaNotification<R: Runtime>(AppHandle<R>);
 
 impl<R: Runtime> MediaNotification<R> {
-    pub fn ping(&self, payload: PingRequest) -> crate::Result<PingResponse> {
-        Ok(PingResponse {
-            value: payload.value,
-        })
-    }
+
 }
