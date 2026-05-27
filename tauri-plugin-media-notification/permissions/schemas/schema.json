@@ -307,6 +307,42 @@
           "markdownDescription": "Denies the ping command without any pre-configured scope."
         },
         {
+          "description": "Enables the registerListener command without any pre-configured scope.",
+          "type": "string",
+          "const": "allow-registerListener",
+          "markdownDescription": "Enables the registerListener command without any pre-configured scope."
+        },
+        {
+          "description": "Denies the registerListener command without any pre-configured scope.",
+          "type": "string",
+          "const": "deny-registerListener",
+          "markdownDescription": "Denies the registerListener command without any pre-configured scope."
+        },
+        {
+          "description": "Enables the register_listener command without any pre-configured scope.",
+          "type": "string",
+          "const": "allow-register-listener",
+          "markdownDescription": "Enables the register_listener command without any pre-configured scope."
+        },
+        {
+          "description": "Denies the register_listener command without any pre-configured scope.",
+          "type": "string",
+          "const": "deny-register-listener",
+          "markdownDescription": "Denies the register_listener command without any pre-configured scope."
+        },
+        {
+          "description": "Enables the remove_listener command without any pre-configured scope.",
+          "type": "string",
+          "const": "allow-remove-listener",
+          "markdownDescription": "Enables the remove_listener command without any pre-configured scope."
+        },
+        {
+          "description": "Denies the remove_listener command without any pre-configured scope.",
+          "type": "string",
+          "const": "deny-remove-listener",
+          "markdownDescription": "Denies the remove_listener command without any pre-configured scope."
+        },
+        {
           "description": "Enables the start_notification command without any pre-configured scope.",
           "type": "string",
           "const": "allow-start-notification",
@@ -319,10 +355,10 @@
           "markdownDescription": "Denies the start_notification command without any pre-configured scope."
         },
         {
-          "description": "Default permissions for the plugin\n#### This default permission set includes:\n\n- `allow-start-notification`",
+          "description": "Default permissions for the plugin\n#### This default permission set includes:\n\n- `allow-start-notification`\n- `allow-remove-listener`\n- `allow-registerListener`",
           "type": "string",
           "const": "default",
-          "markdownDescription": "Default permissions for the plugin\n#### This default permission set includes:\n\n- `allow-start-notification`"
+          "markdownDescription": "Default permissions for the plugin\n#### This default permission set includes:\n\n- `allow-start-notification`\n- `allow-remove-listener`\n- `allow-registerListener`"
         }
       ]
     }

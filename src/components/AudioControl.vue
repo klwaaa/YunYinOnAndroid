@@ -59,7 +59,7 @@
   import {storeToRefs} from "pinia";
   import usePlaybackMode from "../hooks/usePlaybackMode.ts";
   import {useGetPlayList} from "../store/playList.ts";
-  import {invoke} from "@tauri-apps/api/core";
+  import {invoke, addPluginListener} from "@tauri-apps/api/core";
   import router from "../router";
   import emitter from "../utils/emitter.ts";
   
@@ -92,60 +92,42 @@
   
   invoke("plugin:media-notification|start_notification", {
     notificationArgs: {
-      songTitle: "111111",
-      isPlaying: false
+      songTitle: playingSong.value || "未知歌曲",
+      isPlaying: isPlaying.value ?? false
     }
-  }).then((res) => {
-    console.log("启动成功", res);
-  }).catch((err) => {
-    console.error("启动失败", err);
   });
   
-  import { addPluginListener } from "@tauri-apps/api/core"
+  
+  let previousPluginListener: any = null;
+  let nextPluginListener: any = null;
+  let playpausePluginListener: any = null;
+  
   
   // 播放暂停
   addPluginListener(
       "media-notification",
       "playpause",
-      () => {
-        
-        console.log("点击播放暂停")
-        
-        // 这里控制真正 audio 播放
-      }
-  ).then(()=>{
-    console.log("添加播放暂停监听成功");
-  }).catch((err) => {
-    console.log("添加播放暂停监听失败",err);
-  })
+      control
+  )
   
   // 上一曲
+  
   addPluginListener(
       "media-notification",
       "previous",
-      () => {
-        
-        console.log("上一曲")
-      }
-  ).then(()=>{
-    console.log("添加上一曲监听成功");
-  }).catch((err) => {
-    console.log("添加上一曲监听失败",err);
-  })
+      previousSong
+  ).then((cancelFn) => {
+    previousPluginListener = cancelFn; // 异步赋值，不阻塞
+  });
   
   // 下一曲
   addPluginListener(
       "media-notification",
       "next",
-      () => {
-        
-        console.log("下一曲")
-      }
-  ).then(()=>{
-    console.log("添加下一曲监听成功");
-  }).catch((err) => {
-    console.log("添加下一曲监听失败",err);
-  })
+      nextSong
+  ).then((cancelFn) => {
+    nextPluginListener = cancelFn;
+  });
   
   
   watch(playbackModeIndex, (newIndex) => {
@@ -345,11 +327,18 @@
       playingSong.value = playList[controlAudioKeyCount].name;
       audioDuration.value = playList[controlAudioKeyCount].duration;
     }
+    invoke("plugin:media-notification|start_notification", {
+      notificationArgs: {
+        songTitle: playingSong.value || "未知歌曲",
+        isPlaying: isPlaying.value ?? false
+      }
+    });
   }
   
   
   // 控制播放
   function control() {
+    
     if (isPlaying.value) {
       isPlaying.value = false;
       clearAudioBufferSourceNode();
@@ -367,6 +356,12 @@
         }, 50);
       }
     }
+    invoke("plugin:media-notification|start_notification", {
+      notificationArgs: {
+        songTitle: playingSong.value || "未知歌曲",
+        isPlaying: isPlaying.value ?? false
+      }
+    });
   }
   
   // 下一首
@@ -383,6 +378,12 @@
       playingSong.value = playList[controlAudioKeyCount].name;
       audioDuration.value = playList[controlAudioKeyCount].duration;
     }
+    invoke("plugin:media-notification|start_notification", {
+      notificationArgs: {
+        songTitle: playingSong.value || "未知歌曲",
+        isPlaying: isPlaying.value ?? false
+      }
+    });
   }
   
   
@@ -563,6 +564,10 @@
     if (audioCtx && audioCtx.state !== 'closed') {
       await audioCtx.close();
     }
+    nextPluginListener?.();
+    previousPluginListener?.();
+    playpausePluginListener?.();
+    
   });
 </script>
 

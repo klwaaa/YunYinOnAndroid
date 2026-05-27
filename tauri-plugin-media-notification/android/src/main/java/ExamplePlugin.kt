@@ -318,12 +318,14 @@ class ExampleForegroundService : Service() {
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
 
-            val channel =
-                NotificationChannel(
-                    CHANNEL_ID,
-                    "音乐播放控制",
-                    NotificationManager.IMPORTANCE_LOW
-                )
+            val channel = NotificationChannel(
+                        CHANNEL_ID,
+                        "音乐播放控制",
+                        NotificationManager.IMPORTANCE_LOW
+                    ).apply {
+                        // 禁用应用图标的通知角标（红点）
+                        setShowBadge(false)
+                    }
 
             val manager =
                 getSystemService(
