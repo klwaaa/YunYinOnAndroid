@@ -32,16 +32,16 @@
         <div class="volumeControl" ref="volumeControl">
           <transition name="fade">
             <el-slider
-                    v-show="showVolume"
-                    v-model="volume"
-                    :min="0"
-                    :max="100"
-                    :step="1"
-                    @input="updateVolume"
-                    show-tooltip
-                    vertical
-                    height="150px"
-                    class="volume-slider"
+                v-show="showVolume"
+                v-model="volume"
+                :min="0"
+                :max="100"
+                :step="1"
+                @input="updateVolume"
+                show-tooltip
+                vertical
+                height="150px"
+                class="volume-slider"
             />
           </transition>
           <button class="volumeControlButton" @click="showVolumeControl">
@@ -59,7 +59,7 @@
   import {storeToRefs} from "pinia";
   import usePlaybackMode from "../hooks/usePlaybackMode.ts";
   import {useGetPlayList} from "../store/playList.ts";
-  import {invoke} from "@tauri-apps/api/core";
+  import {invoke, addPluginListener} from "@tauri-apps/api/core";
   import router from "../router";
   import emitter from "../utils/emitter.ts";
   
@@ -88,6 +88,55 @@
     audioDuration,
     playingPlayList
   } = storeToRefs(useGetAudio());
+  
+  
+  invoke("plugin:media-notification|start_notification", {
+    notificationArgs: {
+      songTitle: playingSong.value || "未知歌曲",
+      isPlaying: isPlaying.value ?? false
+    }
+  });
+  
+  
+  let previousPluginListener: any = null;
+  let nextPluginListener: any = null;
+  let playpausePluginListener: any = null;
+  
+  
+  // 播放暂停
+  addPluginListener(
+      "media-notification",
+      "playpause",
+      control
+  ).then((cancelFn) => {
+    playpausePluginListener = cancelFn; // 异步赋值，不阻塞
+  });
+  
+  // 上一曲
+  
+  addPluginListener(
+      "media-notification",
+      "previous",
+      ()=>{
+        previousSong()
+        debounceChooseSong()
+      },
+  ).then((cancelFn) => {
+    previousPluginListener = cancelFn; // 异步赋值，不阻塞
+  });
+  
+  // 下一曲
+  addPluginListener(
+      "media-notification",
+      "next",
+      ()=>{
+        nextSong()
+        debounceChooseSong()
+      },
+  ).then((cancelFn) => {
+    nextPluginListener = cancelFn;
+  });
+  
   
   watch(playbackModeIndex, (newIndex) => {
     playbackModeIndex.value = newIndex;
@@ -308,6 +357,12 @@
         }, 50);
       }
     }
+    invoke("plugin:media-notification|start_notification", {
+      notificationArgs: {
+        songTitle: playingSong.value || "未知歌曲",
+        isPlaying: isPlaying.value ?? false
+      }
+    });
   }
   
   // 下一首
@@ -332,7 +387,7 @@
       shuffledIndex.value = controlAudioKeyCount;
       for (let i = 0; i < playList.length; i++) {
         if (playList[i].name.substring(0, playList[i].name.lastIndexOf(".")) ===
-          randomPlaylist[shuffledIndex.value].name.substring(0, randomPlaylist[shuffledIndex.value].name.lastIndexOf("."))) {
+            randomPlaylist[shuffledIndex.value].name.substring(0, randomPlaylist[shuffledIndex.value].name.lastIndexOf("."))) {
           controlAudioKey.value = i;
           break;
         }
@@ -457,35 +512,35 @@
   }, 1000);
   
   watch(
-    displayTime,
-    (newTime, oldTime) => {
-      if (isPlaying.value) {
-        if (oldTime >= globalAudioBufferDuration.value) {
-          clearInterval(interval);
-          interval = null;
-        } else {
-          if (interval === null) {
-            interval = setInterval(() => {
-              currentAudioTime.value += 0.05;
+      displayTime,
+      (newTime, oldTime) => {
+        if (isPlaying.value) {
+          if (oldTime >= globalAudioBufferDuration.value) {
+            clearInterval(interval);
+            interval = null;
+          } else {
+            if (interval === null) {
+              interval = setInterval(() => {
+                currentAudioTime.value += 0.05;
+              }, 50);
+            }
+          }
+        }
+        if (newTime >= audioDuration.value && iterationsGroupCount !== 0) {
+          if (playbackModeIndex.value !== 1) {
+            nextSong();
+            debounceChooseSong();
+          } else {
+            currentAudioTime.value = 0;
+            handleChange();
+            setTimeout(() => {
+              interval = setInterval(() => {
+                currentAudioTime.value += 0.05;
+              }, 50);
             }, 50);
           }
         }
-      }
-      if (newTime >= audioDuration.value && iterationsGroupCount !== 0) {
-        if (playbackModeIndex.value !== 1) {
-          nextSong();
-          debounceChooseSong();
-        } else {
-          currentAudioTime.value = 0;
-          handleChange();
-          setTimeout(() => {
-            interval = setInterval(() => {
-              currentAudioTime.value += 0.05;
-            }, 50);
-          }, 50);
-        }
-      }
-    }, {deep: true}
+      }, {deep: true}
   );
   
   onUnmounted(async () => {
@@ -504,6 +559,9 @@
     if (audioCtx && audioCtx.state !== 'closed') {
       await audioCtx.close();
     }
+    await nextPluginListener?.unregister();
+    await previousPluginListener?.unregister();
+    await playpausePluginListener?.unregister();
   });
 </script>
 

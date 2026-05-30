@@ -1,0 +1,7 @@
+[default]
+description = "Default permissions for the plugin"
+permissions = [
+    "allow-start-notification",
+    "allow-remove-listener",
+    "allow-registerListener"
+]

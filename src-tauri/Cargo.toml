@@ -16,7 +16,7 @@ crate-type = ["staticlib", "cdylib", "rlib"]
 
 [dependencies]
 tauri = { version = "2.9.5", features = ["devtools"] }
-tauri-plugin-opener = "2.3.0"  # 确保插件版本兼容
+tauri-plugin-media-notification = { path = "../tauri-plugin-media-notification" }
 serde = { version = "1.0", features = ["derive"] }
 serde_json = "1.0"
 indexmap = { version = "2", features = ["serde"] }
