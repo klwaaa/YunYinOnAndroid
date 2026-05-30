@@ -321,7 +321,7 @@ class ExampleForegroundService : Service() {
             val channel = NotificationChannel(
                         CHANNEL_ID,
                         "音乐播放控制",
-                        NotificationManager.IMPORTANCE_LOW
+                        NotificationManager.IMPORTANCE_DEFAULT
                     ).apply {
                         // 禁用应用图标的通知角标（红点）
                         setShowBadge(false)
@@ -375,7 +375,7 @@ class ExampleForegroundService : Service() {
             .setOnlyAlertOnce(true)
 
             .setOngoing(true)
-
+            .setCategory(Notification.CATEGORY_TRANSPORT)
             // 上一曲
             .addAction(
                 android.R.drawable.ic_media_previous,
@@ -404,7 +404,7 @@ class ExampleForegroundService : Service() {
             )
 
             .setStyle(
-                MediaStyle()
+                MediaStyle().setShowActionsInCompactView(0, 1, 2)
             )
 
             .build()
