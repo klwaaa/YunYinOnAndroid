@@ -108,14 +108,19 @@
       "media-notification",
       "playpause",
       control
-  )
+  ).then((cancelFn) => {
+    playpausePluginListener = cancelFn; // 异步赋值，不阻塞
+  });
   
   // 上一曲
   
   addPluginListener(
       "media-notification",
       "previous",
-      previousSong
+      ()=>{
+        previousSong()
+        debounceChooseSong()
+      },
   ).then((cancelFn) => {
     previousPluginListener = cancelFn; // 异步赋值，不阻塞
   });
@@ -124,7 +129,10 @@
   addPluginListener(
       "media-notification",
       "next",
-      nextSong
+      ()=>{
+        nextSong()
+        debounceChooseSong()
+      },
   ).then((cancelFn) => {
     nextPluginListener = cancelFn;
   });
@@ -327,18 +335,11 @@
       playingSong.value = playList[controlAudioKeyCount].name;
       audioDuration.value = playList[controlAudioKeyCount].duration;
     }
-    invoke("plugin:media-notification|start_notification", {
-      notificationArgs: {
-        songTitle: playingSong.value || "未知歌曲",
-        isPlaying: isPlaying.value ?? false
-      }
-    });
   }
   
   
   // 控制播放
   function control() {
-    
     if (isPlaying.value) {
       isPlaying.value = false;
       clearAudioBufferSourceNode();
@@ -378,12 +379,6 @@
       playingSong.value = playList[controlAudioKeyCount].name;
       audioDuration.value = playList[controlAudioKeyCount].duration;
     }
-    invoke("plugin:media-notification|start_notification", {
-      notificationArgs: {
-        songTitle: playingSong.value || "未知歌曲",
-        isPlaying: isPlaying.value ?? false
-      }
-    });
   }
   
   
@@ -564,10 +559,9 @@
     if (audioCtx && audioCtx.state !== 'closed') {
       await audioCtx.close();
     }
-    nextPluginListener?.();
-    previousPluginListener?.();
-    playpausePluginListener?.();
-    
+    await nextPluginListener?.unregister();
+    await previousPluginListener?.unregister();
+    await playpausePluginListener?.unregister();
   });
 </script>
 
